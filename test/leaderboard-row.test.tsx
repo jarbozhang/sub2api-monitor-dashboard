@@ -27,6 +27,8 @@ describe("LeaderboardRow", () => {
     );
 
     expect(screen.getByText("operator-a")).toBeInTheDocument();
+    expect(screen.getByText("冠军")).toBeInTheDocument();
+    expect(screen.getByText("#1")).toBeInTheDocument();
     expect(screen.getByText("88")).toBeInTheDocument();
     expect(screen.getByText("占比")).toBeInTheDocument();
     expect(screen.getByText("42%")).toBeInTheDocument();

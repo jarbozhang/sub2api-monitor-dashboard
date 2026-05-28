@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LeaderboardPeriod, LeaderboardSnapshot } from "@/types/leaderboard";
+import { FullscreenButton } from "@/components/leaderboard/FullscreenButton";
 import { LeaderboardRow } from "@/components/leaderboard/LeaderboardRow";
 import { MetricHeader } from "@/components/leaderboard/MetricHeader";
 import { PeriodTicker } from "@/components/leaderboard/PeriodTicker";
@@ -150,10 +151,13 @@ export function LeaderboardScreen({ config }: LeaderboardScreenProps) {
             seconds={config.periodRotateSeconds}
             autoRotate={config.autoRotate}
           />
-          <div className="page-indicator">
-            <span>{String(pageIndex + 1).padStart(2, "0")}</span>
-            <i />
-            <span>{String(totalPages).padStart(2, "0")}</span>
+          <div className="stage-actions">
+            <div className="page-indicator" aria-label="当前页码">
+              <span>{String(pageIndex + 1).padStart(2, "0")}</span>
+              <i />
+              <span>{String(totalPages).padStart(2, "0")}</span>
+            </div>
+            <FullscreenButton />
           </div>
         </div>
 
