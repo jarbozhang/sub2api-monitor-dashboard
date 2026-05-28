@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sub2API Token 消耗监控排行榜计划</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07090f;
+      --panel: rgba(16, 22, 34, 0.82);
+      --panel-strong: rgba(22, 31, 47, 0.96);
+      --line: rgba(148, 163, 184, 0.22);
+      --text: #e8eef8;
+      --muted: #91a0b7;
+      --soft: #c8d4e6;
+      --cyan: #36d7ff;
+      --green: #43f0b1;
+      --amber: #ffd166;
+      --red: #ff6b7a;
+      --code: #0d1320;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(54, 215, 255, 0.16), transparent 30%),
+        radial-gradient(circle at 85% 18%, rgba(67, 240, 177, 0.12), transparent 28%),
+        linear-gradient(145deg, #06070d 0%, #0b101a 42%, #090d14 100%);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.7;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.15));
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 28px;
+      width: min(1440px, calc(100vw - 48px));
+      margin: 0 auto;
+      padding: 36px 0 72px;
+    }
+
+    aside {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(8, 12, 20, 0.78);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    nav a {
+      display: block;
+      padding: 7px 8px;
+      border-radius: 6px;
+      color: var(--soft);
+      font-size: 13px;
+    }
+
+    nav a:hover {
+      background: rgba(54, 215, 255, 0.1);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px;
+      border: 1px solid rgba(54, 215, 255, 0.22);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(20, 30, 48, 0.96), rgba(9, 13, 22, 0.98)),
+        repeating-linear-gradient(90deg, transparent 0 16px, rgba(54, 215, 255, 0.05) 16px 17px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--green), var(--amber));
+      opacity: 0.9;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 18px var(--green);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 820px;
+      margin: 18px 0 0;
+      color: var(--soft);
+      font-size: 17px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--soft);
+      background: rgba(255,255,255,0.04);
+      font-size: 12px;
+    }
+
+    section {
+      margin-top: 24px;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 10px 0;
+      color: var(--soft);
+    }
+
+    ul, ol {
+      margin: 10px 0 0;
+      padding-left: 22px;
+      color: var(--soft);
+    }
+
+    li + li {
+      margin-top: 6px;
+    }
+
+    code {
+      padding: 2px 6px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 5px;
+      background: rgba(13, 19, 32, 0.88);
+      color: #d8f6ff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow: auto;
+      margin: 14px 0 0;
+      padding: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 8px;
+      background: var(--code);
+      color: #d9e7ff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    pre code {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      min-height: 104px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-strong);
+    }
+
+    .stat b {
+      display: block;
+      color: var(--text);
+      font-size: 26px;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .callout {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-left: 3px solid var(--cyan);
+      border-radius: 6px;
+      background: rgba(54, 215, 255, 0.08);
+      color: var(--soft);
+    }
+
+    .warning {
+      border-left-color: var(--amber);
+      background: rgba(255, 209, 102, 0.08);
+    }
+
+    .unit {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(8, 12, 20, 0.46);
+    }
+
+    .unit h3 {
+      margin-top: 0;
+    }
+
+    .screen-preview {
+      margin-top: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(54, 215, 255, 0.22);
+      border-radius: 8px;
+      background: #090f18;
+    }
+
+    .preview-top {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .preview-top div {
+      padding: 12px;
+      background: #101827;
+    }
+
+    .preview-top span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .preview-top b {
+      display: block;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 18px;
+    }
+
+    .preview-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 150px 120px 180px;
+      align-items: center;
+      gap: 12px;
+      min-height: 58px;
+      padding: 0 16px;
+      border-top: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .rank {
+      color: var(--amber);
+      font-weight: 800;
+      font-size: 22px;
+    }
+
+    .name {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .metric {
+      color: var(--soft);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .spark {
+      width: 100%;
+      height: 32px;
+    }
+
+    .spark path {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 5px rgba(67, 240, 177, 0.55));
+    }
+
+    footer {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      .shell {
+        display: block;
+        width: min(100% - 28px, 860px);
+        padding-top: 18px;
+      }
+
+      aside {
+        position: static;
+        max-height: none;
+        margin-bottom: 18px;
+      }
+
+      .grid,
+      .preview-top {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-row {
+        grid-template-columns: 58px 1fr;
+        padding: 12px;
+      }
+
+      .preview-row .metric,
+      .preview-row .spark {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <strong>Sub2API 监控大屏计划</strong>
+        <span>更新于 2026-05-28</span>
+      </div>
+      <nav>
+        <a href="#goal">目标</a>
+        <a href="#facts">接口事实</a>
+        <a href="#scope">产品范围</a>
+        <a href="#screen">大屏体验</a>
+        <a href="#refresh">刷新规则</a>
+        <a href="#data">数据模型</a>
+        <a href="#tech">技术方案</a>
+        <a href="#units">实施单元</a>
+        <a href="#acceptance">验收标准</a>
+        <a href="#risks">风险</a>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <div class="eyebrow">Plan</div>
+        <h1>Sub2API Token 消耗监控排行榜</h1>
+        <p>一个全新的 Next.js + React 监控大屏，用永久 Admin API Key 从 Sub2API 管理接口拉取数据，持续展示用户 token 消耗排名。页面不展示邮箱，不展示费用，默认无人值守自动刷新和轮播。</p>
+        <div class="meta">
+          <span class="pill">Next.js App Router</span>
+          <span class="pill">React 大屏 UI</span>
+          <span class="pill">x-api-key 服务端接入</span>
+          <span class="pill">今日 / 7 天 / 30 天</span>
+        </div>
+      </header>
+
+      <section id="goal">
+        <h2>目标</h2>
+        <p>首版只做一个酷炫、稳定、信息密度合适的排行榜。页面默认打开即运行，主要面向监控屏，不要求操作者频繁点击。</p>
+        <div class="grid">
+          <div class="stat"><b>Top N</b><span>默认展示前 20 名，人数更多时自动分页。</span></div>
+          <div class="stat"><b>0 邮箱</b><span>每行展示用户名，不展示用户邮箱。</span></div>
+          <div class="stat"><b>0 费用</b><span>只展示 token、请求数和趋势，不展示成本。</span></div>
+        </div>
+      </section>
+
+      <section id="facts">
+        <h2>接口事实</h2>
+        <p>已确认 Sub2API 管理接口不必依赖页面运行时登录。管理路由支持 <code>x-api-key</code> 认证，适合把永久 Admin API Key 放在新应用的服务端环境变量里。</p>
+        <ul>
+          <li>Admin API Key 管理接口：<code>GET /api/v1/admin/settings/admin-api-key</code>、<code>POST /api/v1/admin/settings/admin-api-key/regenerate</code>、<code>DELETE /api/v1/admin/settings/admin-api-key</code>。</li>
+          <li>当前实例查询结果为 <code>exists: false</code>，上线前需要先在 Sub2API 管理端生成一次 key。</li>
+          <li>排行榜汇总接口：<code>GET /api/v1/admin/dashboard/users-ranking</code>。</li>
+          <li>用户趋势接口：<code>GET /api/v1/admin/dashboard/users-trend</code>。</li>
+          <li><code>users-ranking</code> 适合排序，返回结构为 <code>data.ranking</code>，但不稳定提供用户名。</li>
+          <li><code>users-trend</code> 适合趋势和用户名补全，返回结构为 <code>data.trend</code>，每行可包含 <code>username</code>。</li>
+          <li>已通过生成的 Admin API Key 验证：直接使用 <code>x-api-key</code> 可以访问排行榜和趋势接口，不依赖登录态。</li>
+        </ul>
+        <div class="callout">BFF 层按 <code>user_id</code> 合并两个接口：排序用 ranking，展示名优先用 trend 的 <code>username</code>，缺失时显示 <code>用户 #&lt;短 user_id&gt;</code>，不退回邮箱。</div>
+      </section>
+
+      <section id="scope">
+        <h2>产品范围</h2>
+        <h3>包含</h3>
+        <ul>
+          <li>一个监控大屏首页。</li>
+          <li>一个服务端 API 聚合层，统一调用 Sub2API 管理接口。</li>
+          <li>今日、近 7 天、近 30 天三个时间窗口。</li>
+          <li>Top N 排行、自动分页、趋势 sparkline、刷新状态和最近更新时间。</li>
+          <li>排名变化、数字滚动、趋势线绘制、行高亮、周期切换过渡。</li>
+        </ul>
+        <h3>不包含</h3>
+        <ul>
+          <li>多页面后台系统、应用内登录系统、CSV 导出、告警规则。</li>
+          <li>费用展示、邮箱展示、多实例聚合。</li>
+          <li>对 Sub2API 的写操作。生成 Admin API Key 是一次性运维动作，不在监控页面里做。</li>
+        </ul>
+      </section>
+
+      <section id="screen">
+        <h2>大屏体验</h2>
+        <p>页面应该像监控屏，而不是后台表格。顶部只保留当前周期、总 token、总请求数、活跃用户数、最近更新时间和刷新状态；主体区域稳定展示排行榜。</p>
+        <div class="screen-preview" aria-label="排行榜界面示意">
+          <div class="preview-top">
+            <div><span>周期</span><b>今日</b></div>
+            <div><span>Token</span><b>18.4M</b></div>
+            <div><span>请求</span><b>42,108</b></div>
+            <div><span>刷新</span><b>11:32:06</b></div>
+          </div>
+          <div class="preview-row">
+            <div class="rank">#1</div>
+            <div class="name">张三</div>
+            <div class="metric">8.2M tokens</div>
+            <div class="metric">12,904 req</div>
+            <svg class="spark" viewBox="0 0 160 36" role="img" aria-label="趋势线"><path d="M3 28 C18 22 24 10 39 17 S63 31 78 19 S105 5 122 13 S139 31 157 9"></path></svg>
+          </div>
+          <div class="preview-row">
+            <div class="rank">#2</div>
+            <div class="name">用户 #a91c2f</div>
+            <div class="metric">5.6M tokens</div>
+            <div class="metric">9,210 req</div>
+            <svg class="spark" viewBox="0 0 160 36" role="img" aria-label="趋势线"><path d="M3 22 C24 16 30 27 48 21 S75 8 91 14 S116 25 132 18 S146 12 157 20"></path></svg>
+          </div>
+        </div>
+        <h3>动效原则</h3>
+        <ul>
+          <li>排名变化平滑移动，升降名次用短暂颜色和箭头提示。</li>
+          <li>新进入榜单淡入并短暂高亮，离开当前页淡出后移除。</li>
+          <li>token 和请求数使用 600 到 900ms 的数字滚动。</li>
+          <li>趋势线刷新后从左到右重绘。</li>
+          <li>自动分页和周期轮播使用平滑过渡，避免瞬间跳屏。</li>
+          <li>尊重 <code>prefers-reduced-motion</code>。</li>
+        </ul>
+      </section>
+
+      <section id="refresh">
+        <h2>定时刷新规则</h2>
+        <ul>
+          <li>首次打开页面立即请求一次数据。</li>
+          <li>数据刷新间隔默认 60 秒，通过 <code>LEADERBOARD_REFRESH_SECONDS</code> 配置。</li>
+          <li>周期自动轮播默认 20 秒，通过 <code>LEADERBOARD_PERIOD_ROTATE_SECONDS</code> 配置。</li>
+          <li>数据刷新和周期轮播相互独立。</li>
+          <li>每次刷新都重新计算时间范围，默认时区 <code>Asia/Shanghai</code>。</li>
+          <li>今日窗口为当天 00:00:00 到当前时间。</li>
+          <li>近 7 天窗口为包含今天在内的最近 7 个自然日。</li>
+          <li>近 30 天窗口为包含今天在内的最近 30 个自然日。</li>
+          <li>如果上一轮请求还没结束，跳过本次刷新，不并发叠加。</li>
+          <li>请求失败时保留上一份成功快照，顶部显示失败状态和失败次数。</li>
+          <li>页面不可见时可以降低刷新频率到 5 分钟；重新可见后立即刷新一次。</li>
+          <li>自动分页默认每 12 秒翻一页。</li>
+        </ul>
+      </section>
+
+      <section id="data">
+        <h2>数据模型</h2>
+        <pre><code>type LeaderboardPeriod = "today" | "week" | "month";
+
+type LeaderboardRow = {
+  rank: number;
+  userId: string;
+  displayName: string;
+  tokens: number;
+  requests: number;
+  trend: Array&lt;{
+    bucket: string;
+    tokens: number;
+    requests: number;
+  }&gt;;
+  rankDelta?: number;
+};
+
+type LeaderboardSnapshot = {
+  period: LeaderboardPeriod;
+  generatedAt: string;
+  timezone: string;
+  totals: {
+    tokens: number;
+    requests: number;
+    activeUsers: number;
+  };
+  rows: LeaderboardRow[];
+};</code></pre>
+        <p><code>displayName</code> 优先使用 trend 数据里的 <code>username</code>；为空时显示 <code>用户 #&lt;userId 前 6 位&gt;</code>；禁止使用邮箱兜底。</p>
+      </section>
+
+      <section id="tech">
+        <h2>技术方案</h2>
+        <ul>
+          <li>Next.js App Router。</li>
+          <li>React Client Component 负责动画和定时刷新。</li>
+          <li>Route Handler 负责服务端聚合和密钥保护。</li>
+          <li>TypeScript。</li>
+          <li>Tailwind CSS 或项目内轻量 CSS 变量。</li>
+          <li>图表使用轻量 SVG sparkline，不引入重型图表库。</li>
+        </ul>
+        <div class="callout">Context7 查阅的 Next.js 文档确认：App Router 的 Route Handler 可以用标准 <code>GET(request: Request)</code> 处理 API；服务端代码可通过 <code>process.env</code> 读取环境变量；频繁变化数据应使用 <code>fetch(..., { cache: "no-store" })</code> 或等价方式避免缓存。</div>
+
+        <h3>目录规划</h3>
+        <pre><code>app/
+  page.tsx
+  api/
+    leaderboard/
+      route.ts
+  globals.css
+components/
+  leaderboard/
+    LeaderboardScreen.tsx
+    LeaderboardRow.tsx
+    MetricHeader.tsx
+    PeriodTicker.tsx
+    Sparkline.tsx
+lib/
+  sub2api/
+    client.ts
+    leaderboard.ts
+    time-windows.ts
+  formatting.ts
+  env.ts
+types/
+  leaderboard.ts
+docs/
+  plans/
+    sub2api-token-leaderboard.md
+    sub2api-token-leaderboard.html</code></pre>
+
+        <h3>环境变量</h3>
+        <pre><code>SUB2API_BASE_URL=http://100.102.206.124:18080
+SUB2API_ADMIN_API_KEY=
+SUB2API_TIMEZONE=Asia/Shanghai
+LEADERBOARD_REFRESH_SECONDS=60
+LEADERBOARD_PERIOD_ROTATE_SECONDS=20
+LEADERBOARD_AUTO_ROTATE=true
+LEADERBOARD_DEFAULT_PERIOD=today
+LEADERBOARD_PAGE_SECONDS=12</code></pre>
+        <p>首版不需要 <code>SUB2API_ADMIN_EMAIL</code> 和 <code>SUB2API_ADMIN_PASSWORD</code>。如果没有 Admin API Key，先到 Sub2API 管理端生成，而不是让监控页面登录。</p>
+      </section>
+
+      <section id="units">
+        <h2>实施单元</h2>
+
+        <div class="unit">
+          <h3>1. 初始化全新 Next.js 项目</h3>
+          <p>建立 <code>package.json</code>、<code>next.config.ts</code>、<code>tsconfig.json</code>、<code>app/layout.tsx</code>、<code>app/page.tsx</code>、<code>app/globals.css</code>。清理旧部署项目文件，仅保留 <code>docs/</code>，并添加只属于本应用的配置。</p>
+          <p>测试：lint、typecheck、首页空数据状态。</p>
+        </div>
+
+        <div class="unit">
+          <h3>2. Sub2API 服务端客户端</h3>
+          <p>实现 <code>lib/env.ts</code>、<code>lib/sub2api/client.ts</code>、<code>lib/sub2api/time-windows.ts</code>、<code>lib/sub2api/leaderboard.ts</code>、<code>types/leaderboard.ts</code>。封装 <code>x-api-key</code> 请求、时间窗口、ranking + trend 合并和展示名兜底。</p>
+          <p>测试：时间窗口、username 缺失兜底、输出不含 email、请求失败错误。</p>
+        </div>
+
+        <div class="unit">
+          <h3>3. Next.js 聚合 API</h3>
+          <p>实现 <code>GET /api/leaderboard</code>，支持 <code>period</code> 和 <code>limit</code>，使用 <code>no-store</code>，返回统一快照。</p>
+          <p>测试：非法 period、key 缺失、Sub2API 认证失败、成功快照结构。</p>
+        </div>
+
+        <div class="unit">
+          <h3>4. 大屏排行榜 UI</h3>
+          <p>实现排行榜主屏、行组件、顶部指标、周期提示和 SVG sparkline。行内只展示排名、用户名、token、请求数和趋势图。</p>
+          <p>测试：不出现 cost、不出现 email、sparkline 点数正确、1440x900 和 1920x1080 截图检查。</p>
+        </div>
+
+        <div class="unit">
+          <h3>5. 自动刷新、轮播和动画</h3>
+          <p>实现首次加载、60 秒刷新、20 秒周期轮播、自动分页、请求并发保护、排名/数字/趋势动画和 <code>prefers-reduced-motion</code>。</p>
+          <p>测试：fake timers 覆盖刷新、轮播、并发保护和失败保留旧数据。</p>
+        </div>
+      </section>
+
+      <section id="acceptance">
+        <h2>验收标准</h2>
+        <ul>
+          <li>打开首页无需点击即可看到排行榜。</li>
+          <li>页面默认自动在今日、近 7 天、近 30 天之间轮播。</li>
+          <li>数据默认每 60 秒刷新一次。</li>
+          <li>每行只显示排名、用户名、token、请求数和趋势图。</li>
+          <li>页面任何位置都不展示用户邮箱。</li>
+          <li>页面任何位置都不展示费用。</li>
+          <li>Admin API Key 只存在服务端环境变量中，不进入浏览器 bundle 或接口响应。</li>
+          <li>今日趋势按小时展示，7 天和 30 天趋势按天展示。</li>
+          <li>超过可见行数时自动分页或自动滚动，不需要鼠标操作。</li>
+          <li>Sub2API 短暂不可用时保留最后一次成功数据。</li>
+        </ul>
+      </section>
+
+      <section id="risks">
+        <h2>风险与处理</h2>
+        <ul>
+          <li><code>users-ranking</code> 不直接返回 username：通过 <code>users-trend</code> 合并，缺失时显示匿名用户编号。</li>
+          <li>当前实例还没有 Admin API Key：上线前需要在 Sub2API 管理端生成一次，并写入 <code>.env.local</code>。</li>
+          <li>监控屏长时间运行可能内存增长：只保留当前和上一份快照用于动画对比。</li>
+          <li>数据刷新和动画可能互相干扰：刷新只替换快照，动画由 React 状态对比驱动。</li>
+          <li>小项目容易过度设计：首版不引入数据库、不做登录、不做复杂权限、不做重型图表平台。</li>
+        </ul>
+        <div class="callout warning">后续可选：增加最近 24 小时滚动窗口、模型维度或 API key 维度排行榜、异常峰值提示、只读分享页、部署脚本和健康检查。</div>
+      </section>
+
+      <footer>
+        文档路径：docs/plans/sub2api-token-leaderboard.md 与 docs/plans/sub2api-token-leaderboard.html
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
