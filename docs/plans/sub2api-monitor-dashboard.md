@@ -1,16 +1,16 @@
 ---
-title: Sub2API Token 消耗监控排行榜
+title: Sub2API 监控看板
 status: completed
 created: 2026-05-28
 updated: 2026-05-28
 origin: user request
 ---
 
-# Sub2API Token 消耗监控排行榜计划
+# Sub2API 监控看板计划
 
 ## 目标
 
-做一个全新的 Next.js + React 网页应用，用于在监控大屏上持续展示 Sub2API 管理账号下的 token 消耗排行榜。页面默认无人值守运行，核心体验是“打开后持续看”，不是频繁点击查询。
+做一个全新的 Next.js + React 网页应用，用于在监控大屏上持续展示 Sub2API 管理账号下的 token 使用量、请求量和用户排行。页面默认无人值守运行，核心体验是“打开后持续看”，不是频繁点击查询。
 
 首版只做一个酷炫、稳定、信息密度合适的排行榜：
 
@@ -188,8 +188,8 @@ types/
   leaderboard.ts
 docs/
   plans/
-    sub2api-token-leaderboard.md
-    sub2api-token-leaderboard.html
+    sub2api-monitor-dashboard.md
+    sub2api-monitor-dashboard.html
 ```
 
 ### 服务端 API

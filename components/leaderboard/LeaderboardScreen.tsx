@@ -142,7 +142,7 @@ export function LeaderboardScreen({ config }: LeaderboardScreenProps) {
         timezone={config.timezone}
       />
 
-      <section className="leaderboard-stage" aria-label="Token 排行榜">
+      <section className="leaderboard-stage" aria-label="Sub2API token 使用排行">
         <div className="stage-topline">
           <PeriodTicker
             period={period}

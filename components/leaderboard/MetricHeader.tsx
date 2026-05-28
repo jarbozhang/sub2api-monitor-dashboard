@@ -24,8 +24,8 @@ export function MetricHeader({
       <div className="identity">
         <span className="live-dot" aria-hidden="true" />
         <div>
-          <p>Sub2API Monitor</p>
-          <h1>Token 消耗排行榜</h1>
+          <p>Sub2API 监控</p>
+          <h1>Sub2API 监控看板</h1>
         </div>
       </div>
 

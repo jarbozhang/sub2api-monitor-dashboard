@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sub2API Token Leaderboard",
-  description: "A monitoring screen for Sub2API token usage ranking.",
+  title: "Sub2API 监控看板",
+  description: "Sub2API token 使用量与请求量监控看板。",
 };
 
 export default function RootLayout({
