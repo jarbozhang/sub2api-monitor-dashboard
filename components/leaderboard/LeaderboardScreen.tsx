@@ -127,7 +127,7 @@ export function LeaderboardScreen({ config }: LeaderboardScreenProps) {
     }, config.pageSeconds * 1000);
 
     return () => window.clearInterval(interval);
-  }, [config.pageSeconds, totalPages]);
+  }, [config.pageSeconds, period, totalPages]);
 
   return (
     <main className="screen-shell">
